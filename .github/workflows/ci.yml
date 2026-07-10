@@ -1,0 +1,27 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verifier:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          # Node 24: realtime-js (pulled in by @supabase/supabase-js) needs the
+          # global WebSocket, absent before Node 22.
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      # Unit tests only. RLS isolation tests (npm run test:rls) require a running
+      # Supabase stack (Docker) and are run locally / in a dedicated job, not here.
+      - run: npm run test:run
+      - run: npm run build
+        env:
+          VITE_SUPABASE_URL: http://ci.invalid
+          VITE_SUPABASE_ANON_KEY: ci

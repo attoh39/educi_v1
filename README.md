@@ -1,32 +1,45 @@
-# React + TypeScript + Vite
+# EduCI
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+L'intelligence artificielle au service de la réussite scolaire — PWA
+d'accompagnement scolaire pour les parents (Côte d'Ivoire).
 
-Currently, two official plugins are available:
+## Démarrage local
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Prérequis : Node ≥ 22, Docker Desktop. Le CLI Supabase est une dépendance de
+développement (utilisé via `npx supabase`), rien d'autre à installer.
 
-## React Compiler
+    npm install
+    npx supabase start           # démarre PostgreSQL/Auth locaux (Docker)
+    npx supabase db reset        # applique les migrations
+    cp .env.example .env.local   # puis renseigner les clés de `npx supabase status`
+    node scripts/generate-icons.mjs   # (déjà committées ; utile après modif du logo)
+    npm run dev
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Connexion locale de test : téléphone `+2250700000001`, code `123456` (OTP de test
+défini dans `supabase/config.toml`, aucun SMS réel envoyé).
 
-## Expanding the Oxlint configuration
+## Scripts
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+| Commande | Rôle |
+|---|---|
+| `npm run dev` | serveur de développement |
+| `npm run test` | tests unitaires (watch) |
+| `npm run test:run` | tests unitaires (CI) |
+| `npm run test:rls` | tests d'isolation RLS (Supabase local requis, Node ≥ 22) |
+| `npm run typecheck` | vérification des types |
+| `npm run lint` | analyse statique (oxlint) |
+| `npm run build` | build de production (PWA) |
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
-```
+## Déploiement
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+- **Frontend** : Cloudflare Pages — build `npm run build`, dossier `dist`,
+  variables `VITE_SUPABASE_URL` et `VITE_SUPABASE_ANON_KEY` du projet hébergé.
+- **Base** : projet Supabase hébergé ; appliquer les migrations avec
+  `npx supabase db push`. Configurer un vrai fournisseur SMS (auth téléphone,
+  canal principal) dans Auth → Providers avant l'ouverture au public — la config
+  Twilio factice de `supabase/config.toml` ne sert qu'au développement local.
+
+## Documentation
+
+- Spécification d'architecture : `docs/superpowers/specs/`
+- Plans d'implémentation : `docs/superpowers/plans/`
