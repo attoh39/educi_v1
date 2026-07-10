@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { vi } from 'vitest';
@@ -78,4 +78,26 @@ it('affiche une erreur si le code est invalide', async () => {
   await userEvent.click(screen.getByRole('button', { name: 'Se connecter' }));
   expect(await screen.findByText('Code invalide ou expiré. Réessayez.'))
     .toBeInTheDocument();
+});
+
+it('normalise le numéro (retire les espaces) avant envoi', async () => {
+  mockSignInWithOtp.mockResolvedValue({ error: null });
+  rendre();
+  await userEvent.type(
+    screen.getByLabelText('Numéro de téléphone'), '+225 07 00 00 00 01');
+  await userEvent.click(screen.getByRole('button', { name: 'Recevoir le code' }));
+  expect(mockSignInWithOtp).toHaveBeenCalledWith({ phone: '+2250700000001' });
+});
+
+it('ignore un double envoi pendant que la requête est en vol', async () => {
+  let resoudre: (v: { error: null }) => void = () => {};
+  mockSignInWithOtp.mockReturnValue(new Promise((r) => { resoudre = r; }));
+  rendre();
+  await userEvent.type(
+    screen.getByLabelText('Numéro de téléphone'), '+2250700000001');
+  const form = screen.getByRole('button', { name: 'Recevoir le code' }).closest('form')!;
+  fireEvent.submit(form);
+  fireEvent.submit(form);
+  expect(mockSignInWithOtp).toHaveBeenCalledTimes(1);
+  resoudre({ error: null });
 });

@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useRef, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { fr } from '../../i18n/fr';
@@ -14,29 +14,45 @@ export function LoginPage() {
   const [code, setCode] = useState('');
   const [erreur, setErreur] = useState<string | null>(null);
   const [enCours, setEnCours] = useState(false);
+  const enVol = useRef(false);
 
   async function envoyerCode(e: FormEvent) {
     e.preventDefault();
+    if (enVol.current) return;
+    enVol.current = true;
     setEnCours(true);
     setErreur(null);
-    const { error } = methode === 'email'
-      ? await supabase.auth.signInWithOtp({ email: identifiant })
-      : await supabase.auth.signInWithOtp({ phone: identifiant });
-    setEnCours(false);
-    if (error) { setErreur(fr.auth.erreurEnvoi); return; }
-    setEtape('code');
+    try {
+      const identifiantNettoye =
+        methode === 'email' ? identifiant.trim() : identifiant.replace(/\s/g, '');
+      const { error } = methode === 'email'
+        ? await supabase.auth.signInWithOtp({ email: identifiantNettoye })
+        : await supabase.auth.signInWithOtp({ phone: identifiantNettoye });
+      if (error) { setErreur(fr.auth.erreurEnvoi); return; }
+      setEtape('code');
+    } finally {
+      enVol.current = false;
+      setEnCours(false);
+    }
   }
 
   async function verifierCode(e: FormEvent) {
     e.preventDefault();
+    if (enVol.current) return;
+    enVol.current = true;
     setEnCours(true);
     setErreur(null);
-    const { error } = methode === 'email'
-      ? await supabase.auth.verifyOtp({ email: identifiant, token: code, type: 'email' })
-      : await supabase.auth.verifyOtp({ phone: identifiant, token: code, type: 'sms' });
-    setEnCours(false);
-    if (error) { setErreur(fr.auth.codeInvalide); return; }
-    navigate('/', { replace: true });
+    try {
+      const jeton = code.trim();
+      const { error } = methode === 'email'
+        ? await supabase.auth.verifyOtp({ email: identifiant, token: jeton, type: 'email' })
+        : await supabase.auth.verifyOtp({ phone: identifiant, token: jeton, type: 'sms' });
+      if (error) { setErreur(fr.auth.codeInvalide); return; }
+      navigate('/', { replace: true });
+    } finally {
+      enVol.current = false;
+      setEnCours(false);
+    }
   }
 
   const bascule = (m: Methode) => () => {
