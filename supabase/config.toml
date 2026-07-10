@@ -286,12 +286,17 @@ max_frequency = "5s"
 # uri = "pg-functions://<database>/<schema>/<hook_name>"
 
 # Configure one of the supported SMS providers: `twilio`, `twilio_verify`, `messagebird`, `textlocal`, `vonage`.
+# Local dev only: Twilio is "enabled" with dummy credentials so that GoTrue accepts
+# phone logins. The [auth.sms.test_otp] map above intercepts the test number and
+# returns the fixed code WITHOUT ever calling Twilio, so no SMS is sent and the
+# dummy credentials are never used. Production uses the hosted project's own config.
 [auth.sms.twilio]
-enabled = false
-account_sid = ""
-message_service_sid = ""
-# DO NOT commit your Twilio auth token to git. Use environment variable substitution instead:
-auth_token = "env(SUPABASE_AUTH_SMS_TWILIO_AUTH_TOKEN)"
+enabled = true
+account_sid = "ACtestlocaldummyaccountsid000000000"
+message_service_sid = "MGtestlocaldummymessageservice00000"
+# Local dummy token (never used: test_otp intercepts the test number). Kept as a
+# literal so `supabase start` works out-of-the-box without extra env setup.
+auth_token = "local-dummy-token-unused"
 
 # Multi-factor-authentication is available to Supabase Pro plan.
 [auth.mfa]
