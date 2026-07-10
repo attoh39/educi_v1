@@ -116,3 +116,13 @@ create policy enrollments_own on public.enrollments
       where c.id = child_id and c.parent_id = auth.uid()
     )
   );
+
+-- RLS policies alone do not expose tables through the Data API: Supabase's
+-- current default no longer auto-grants DML to anon/authenticated on new
+-- public tables. Without these GRANTs, PostgREST rejects every authenticated
+-- request with "permission denied for table ..." before RLS is even
+-- evaluated. `anon` intentionally gets nothing: these tables are private to
+-- signed-in parents.
+grant select, insert, update, delete on public.parents to authenticated;
+grant select, insert, update, delete on public.children to authenticated;
+grant select, insert, update, delete on public.enrollments to authenticated;
