@@ -10,6 +10,10 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      workbox: {
+        navigateFallback: '/index.html',
+        navigateFallbackDenylist: [/^\/api\//],
+      },
       manifest: {
         name: 'EduCI',
         short_name: 'EduCI',
