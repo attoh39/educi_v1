@@ -105,5 +105,14 @@ create policy parents_update_own on public.parents
 create policy children_own on public.children
   for all using (parent_id = auth.uid()) with check (parent_id = auth.uid());
 
+-- WITH CHECK also verifies child ownership: without it, a parent could attach
+-- an enrollment to another parent's child and squat its active-enrollment slot.
 create policy enrollments_own on public.enrollments
-  for all using (parent_id = auth.uid()) with check (parent_id = auth.uid());
+  for all using (parent_id = auth.uid())
+  with check (
+    parent_id = auth.uid()
+    and exists (
+      select 1 from public.children c
+      where c.id = child_id and c.parent_id = auth.uid()
+    )
+  );
