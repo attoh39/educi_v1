@@ -8,6 +8,8 @@ export const CLASSES = [
 export type Classe = (typeof CLASSES)[number];
 export type Cycle = 'maternelle' | 'cp_ce1' | 'ce2_cm2' | 'college' | 'lycee';
 export type ModeGeneration = 'primaire' | 'secondaire';
+/** Phase 1A is intentionally single-system (Ivorian curriculum); multi-system
+ *  support will require dispatching CLASSES/CYCLES/MATIERES by Systeme. */
 export type Systeme = 'IVOIRIEN' | 'FRANCAIS' | 'AUTRE';
 
 const CYCLES: Record<Classe, Cycle> = {
@@ -53,7 +55,7 @@ const MATIERES: Record<Cycle, string[]> = {
 };
 
 export function matieresParDefaut(classe: Classe): string[] {
-  return MATIERES[cycleOf(classe)];
+  return [...MATIERES[cycleOf(classe)]];
 }
 
 /** Année scolaire ivoirienne : bascule au 1er août. */

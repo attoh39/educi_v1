@@ -66,6 +66,20 @@ describe('matieresParDefaut', () => {
     expect(matieresParDefaut('TERMINALE')).toContain('Philosophie');
     expect(matieresParDefaut('PS')).toContain('Éveil');
   });
+
+  it('ne fuite pas le tableau interne (retourne une copie)', () => {
+    const a = matieresParDefaut('CP1');
+    a.push('Piraté');
+    expect(matieresParDefaut('CP1')).not.toContain('Piraté');
+  });
+
+  it('chaque classe a un cycle, un libellé et des matières', () => {
+    for (const c of CLASSES) {
+      expect(cycleOf(c)).toBeTruthy();
+      expect(classeLabel(c)).toBeTruthy();
+      expect(matieresParDefaut(c).length).toBeGreaterThan(0);
+    }
+  });
 });
 
 describe('anneeScolaire', () => {
