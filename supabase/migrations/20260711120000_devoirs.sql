@@ -52,11 +52,29 @@ alter table public.homeworks enable row level security;
 alter table public.usage_quotas enable row level security;
 
 create policy homework_requests_own on public.homework_requests
-  for all using (parent_id = auth.uid()) with check (parent_id = auth.uid());
+  for all using (parent_id = auth.uid())
+  with check (
+    parent_id = auth.uid()
+    and exists (select 1 from public.children c
+                where c.id = child_id and c.parent_id = auth.uid())
+  );
 create policy homeworks_own on public.homeworks
-  for all using (parent_id = auth.uid()) with check (parent_id = auth.uid());
+  for all using (parent_id = auth.uid())
+  with check (
+    parent_id = auth.uid()
+    and exists (select 1 from public.children c
+                where c.id = child_id and c.parent_id = auth.uid())
+  );
+-- child ownership in WITH CHECK: without it, a parent could squat another
+-- child's unique(child_id, semaine_iso) quota slot via incrementer_quota and
+-- block that child's real parent (denial of service).
 create policy usage_quotas_own on public.usage_quotas
-  for all using (parent_id = auth.uid()) with check (parent_id = auth.uid());
+  for all using (parent_id = auth.uid())
+  with check (
+    parent_id = auth.uid()
+    and exists (select 1 from public.children c
+                where c.id = child_id and c.parent_id = auth.uid())
+  );
 
 grant select, insert, update, delete on public.homework_requests to authenticated;
 grant select, insert, update, delete on public.homeworks to authenticated;
