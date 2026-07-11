@@ -55,4 +55,17 @@ export const fr = {
     dateFuture: 'La date de naissance ne peut pas être dans le futur.',
     matiereMin: 'Sélectionnez au moins une matière.',
   },
+  devoirs: {
+    titre: 'Générer un devoir',
+    instructionPrimaire: 'Collez le message de l’enseignant (toutes matières confondues).',
+    exempleMessage: 'Français : les syllabes MA, ME, MI.\nMathématiques : additions jusqu’à 20.',
+    generer: 'Générer le devoir',
+    generationEnCours: 'Génération en cours…',
+    imprimer: 'Imprimer / Enregistrer en PDF',
+    quotaAtteint: 'Quota de la semaine atteint pour cet enfant. Réessayez la semaine prochaine.',
+    echec: 'La génération a échoué. Vous pouvez réessayer sans perdre votre quota.',
+    aucunEnfant: 'Ajoutez d’abord un enfant.',
+    choisirEnfant: 'Pour quel enfant ?',
+    entete: { classe: 'Classe', date: 'Date', nom: 'Élève' },
+  },
 } as const;
