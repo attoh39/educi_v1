@@ -1,7 +1,7 @@
 import { config } from 'dotenv';
 config({ path: '.env.rls.local' });
 
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 const URL = process.env.SUPABASE_URL!;
