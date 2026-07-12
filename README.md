@@ -18,6 +18,19 @@ développement (utilisé via `npx supabase`), rien d'autre à installer.
 Connexion locale de test : téléphone `+2250700000001`, code `123456` (OTP de test
 défini dans `supabase/config.toml`, aucun SMS réel envoyé).
 
+### Génération de devoirs (Edge Function)
+
+    # secret local (clé Claude réelle — dépense) :
+    cp supabase/functions/generate-homework/.env.example supabase/functions/generate-homework/.env
+    # éditer .env, puis :
+    npx supabase functions serve generate-homework --env-file supabase/functions/generate-homework/.env
+
+Tests de l'Edge Function (faux serveur Claude, aucune dépense) :
+
+    deno test --allow-net --allow-env supabase/functions/generate-homework/handler.test.ts
+
+En production : `npx supabase secrets set ANTHROPIC_API_KEY=…` puis `npx supabase functions deploy generate-homework`.
+
 ## Scripts
 
 | Commande | Rôle |
