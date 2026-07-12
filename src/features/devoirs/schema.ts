@@ -11,6 +11,7 @@ const exerciceSchema = z.object({
   type: z.enum(TYPES_EXERCICE),
   items: z.array(z.string()),
   espaceReponse: z.enum(ESPACES_REPONSE),
+  points: z.number().int().nonnegative().optional(),
 });
 
 export const devoirSchema = z.object({

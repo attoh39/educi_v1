@@ -18,6 +18,7 @@ export const devoirSchema = z.object({
               type: z.enum(TYPES_EXERCICE),
               items: z.array(z.string()),
               espaceReponse: z.enum(ESPACES_REPONSE),
+              points: z.number().int().nonnegative().optional(),
             }),
           )
           .min(1),
@@ -61,6 +62,7 @@ export const DEVOIR_JSON_SCHEMA = {
                 type: { type: 'string', enum: [...TYPES_EXERCICE] },
                 items: { type: 'array', items: { type: 'string' } },
                 espaceReponse: { type: 'string', enum: [...ESPACES_REPONSE] },
+                points: { type: 'integer' },
               },
               required: ['numero', 'consigne', 'type', 'items', 'espaceReponse'],
             },
