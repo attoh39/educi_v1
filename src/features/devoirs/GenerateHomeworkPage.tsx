@@ -26,7 +26,7 @@ export function GenerateHomeworkPage() {
     setEnCours(true);
     setErreur(null);
     try {
-      const r = await genererDevoir(childId, message.trim());
+      const r = await genererDevoir(childId, { mode: 'primaire', message: message.trim() });
       await mettreEnCacheDevoir(r.homeworkId, r.devoir);
       setDevoir(r.devoir);
     } catch (e) {

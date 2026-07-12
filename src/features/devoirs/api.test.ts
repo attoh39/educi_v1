@@ -14,12 +14,19 @@ import { genererDevoir, listerDevoirs } from './api';
 beforeEach(() => vi.clearAllMocks());
 
 describe('genererDevoir', () => {
-  it('invoque la fonction avec childId et message', async () => {
+  it('invoque la fonction en mode primaire', async () => {
     mockInvoke.mockResolvedValue({ data: { homeworkId: 'h1', devoir: { matieres: [] } }, error: null });
-    const r = await genererDevoir('c1', 'Français : syllabes');
+    const r = await genererDevoir('c1', { mode: 'primaire', message: 'Français : syllabes' });
     expect(r.homeworkId).toBe('h1');
     expect(mockInvoke).toHaveBeenCalledWith('generate-homework', {
       body: { childId: 'c1', message: 'Français : syllabes' },
+    });
+  });
+  it('invoque la fonction en mode secondaire', async () => {
+    mockInvoke.mockResolvedValue({ data: { homeworkId: 'h2', devoir: { matieres: [] } }, error: null });
+    await genererDevoir('c1', { mode: 'secondaire', matieres: [{ matiere: 'Maths', contenu: 'fractions' }] });
+    expect(mockInvoke).toHaveBeenCalledWith('generate-homework', {
+      body: { childId: 'c1', matieres: [{ matiere: 'Maths', contenu: 'fractions' }] },
     });
   });
   it('propage le statut de quota', async () => {
@@ -27,7 +34,7 @@ describe('genererDevoir', () => {
       data: null,
       error: { context: { status: 429 } },
     });
-    await expect(genererDevoir('c1', 'msg valide')).rejects.toMatchObject({ code: 'quota' });
+    await expect(genererDevoir('c1', { mode: 'primaire', message: 'msg valide' })).rejects.toMatchObject({ code: 'quota' });
   });
 });
 

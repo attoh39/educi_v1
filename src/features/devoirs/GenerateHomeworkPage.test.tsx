@@ -34,7 +34,7 @@ it('génère un devoir et l’affiche', async () => {
   await userEvent.type(screen.getByLabelText('Générer un devoir'), 'Français : syllabes MA ME');
   await userEvent.click(screen.getByRole('button', { name: 'Générer le devoir' }));
   expect(await screen.findByText('Français')).toBeInTheDocument();
-  expect(mockGenerer).toHaveBeenCalledWith('c1', 'Français : syllabes MA ME');
+  expect(mockGenerer).toHaveBeenCalledWith('c1', { mode: 'primaire', message: 'Français : syllabes MA ME' });
 });
 
 it('affiche le message de quota atteint', async () => {
