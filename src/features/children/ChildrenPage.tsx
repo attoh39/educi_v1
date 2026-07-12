@@ -39,6 +39,15 @@ export function ChildrenPage() {
                   {classeLabel(inscription.classe as Classe)} · {inscription.etablissement} · {inscription.annee_scolaire}
                 </p>
               )}
+              {inscription && (
+                <Link
+                  to={`/enfants/${e.id}/devoir`}
+                  state={{ eleve: `${e.prenoms} ${e.nom}`, classe: inscription.classe }}
+                  className="mt-2 inline-block rounded-lg bg-teal-600 px-3 py-2 text-sm font-semibold text-white"
+                >
+                  {fr.devoirs.titre}
+                </Link>
+              )}
             </li>
           );
         })}

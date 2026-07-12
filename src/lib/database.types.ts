@@ -129,6 +129,141 @@ export type Database = {
           },
         ]
       }
+      homework_requests: {
+        Row: {
+          child_id: string
+          contenu: Json
+          created_at: string
+          enrollment_id: string
+          erreur: string | null
+          id: string
+          mode: string
+          parent_id: string
+          statut: Database["public"]["Enums"]["homework_statut"]
+        }
+        Insert: {
+          child_id: string
+          contenu: Json
+          created_at?: string
+          enrollment_id: string
+          erreur?: string | null
+          id?: string
+          mode: string
+          parent_id: string
+          statut?: Database["public"]["Enums"]["homework_statut"]
+        }
+        Update: {
+          child_id?: string
+          contenu?: Json
+          created_at?: string
+          enrollment_id?: string
+          erreur?: string | null
+          id?: string
+          mode?: string
+          parent_id?: string
+          statut?: Database["public"]["Enums"]["homework_statut"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "homework_requests_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_requests_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "enrollments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_requests_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "parents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      homeworks: {
+        Row: {
+          child_id: string
+          corrige: Json
+          cout_tokens_entree: number
+          cout_tokens_sortie: number
+          created_at: string
+          enrollment_id: string
+          exercices: Json
+          id: string
+          modele: string
+          parent_id: string
+          profil: string
+          prompt_version: string
+          request_id: string
+        }
+        Insert: {
+          child_id: string
+          corrige: Json
+          cout_tokens_entree?: number
+          cout_tokens_sortie?: number
+          created_at?: string
+          enrollment_id: string
+          exercices: Json
+          id?: string
+          modele: string
+          parent_id: string
+          profil: string
+          prompt_version: string
+          request_id: string
+        }
+        Update: {
+          child_id?: string
+          corrige?: Json
+          cout_tokens_entree?: number
+          cout_tokens_sortie?: number
+          created_at?: string
+          enrollment_id?: string
+          exercices?: Json
+          id?: string
+          modele?: string
+          parent_id?: string
+          profil?: string
+          prompt_version?: string
+          request_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "homeworks_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homeworks_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "enrollments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homeworks_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "parents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homeworks_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: true
+            referencedRelation: "homework_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       parents: {
         Row: {
           created_at: string
@@ -146,6 +281,45 @@ export type Database = {
           id?: string
         }
         Relationships: []
+      }
+      usage_quotas: {
+        Row: {
+          child_id: string
+          generations: number
+          id: string
+          parent_id: string
+          semaine_iso: string
+        }
+        Insert: {
+          child_id: string
+          generations?: number
+          id?: string
+          parent_id: string
+          semaine_iso: string
+        }
+        Update: {
+          child_id?: string
+          generations?: number
+          id?: string
+          parent_id?: string
+          semaine_iso?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usage_quotas_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "usage_quotas_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "parents"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -166,6 +340,10 @@ export type Database = {
         }
         Returns: string
       }
+      incrementer_quota: {
+        Args: { p_child_id: string; p_semaine_iso: string }
+        Returns: number
+      }
     }
     Enums: {
       classe_niveau:
@@ -185,6 +363,7 @@ export type Database = {
         | "SECONDE"
         | "PREMIERE"
         | "TERMINALE"
+      homework_statut: "en_attente" | "generation" | "pret" | "echec"
       systeme_educatif: "IVOIRIEN" | "FRANCAIS" | "AUTRE"
     }
     CompositeTypes: {
@@ -334,6 +513,7 @@ export const Constants = {
         "PREMIERE",
         "TERMINALE",
       ],
+      homework_statut: ["en_attente", "generation", "pret", "echec"],
       systeme_educatif: ["IVOIRIEN", "FRANCAIS", "AUTRE"],
     },
   },
