@@ -1,1 +1,7 @@
 @import 'tailwindcss';
+
+@media print {
+  body * { visibility: hidden; }
+  .devoir-document, .devoir-document * { visibility: visible; }
+  .devoir-document { position: absolute; inset: 0; margin: 0; max-width: none; }
+}
