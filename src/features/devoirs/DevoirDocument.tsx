@@ -24,15 +24,25 @@ export function DevoirDocument(props: {
   eleve: string;
   classe: Classe | string;
   date: string;
+  variante?: 'primaire' | 'secondaire';
 }) {
-  const { devoir, eleve, classe, date } = props;
+  const { devoir, eleve, classe, date, variante = 'primaire' } = props;
   const classeTexte = (CLASSES as readonly string[]).includes(String(classe))
     ? classeLabel(classe as Classe)
     : String(classe);
+  const secondaire = variante === 'secondaire';
+
   return (
     <article className="devoir-document mx-auto max-w-[210mm] bg-white p-6 text-slate-900">
       <header className="mb-4 border-b-2 border-teal-700 pb-3">
-        <h1 className="text-lg font-bold text-teal-700">{fr.app.nom}</h1>
+        <div className="flex items-baseline justify-between">
+          <h1 className="text-lg font-bold text-teal-700">{fr.app.nom}</h1>
+          {secondaire && (
+            <span className="text-base font-bold text-slate-700">
+              <span>{fr.devoirs.controle}</span> — {fr.devoirs.noteSur}
+            </span>
+          )}
+        </div>
         <dl className="mt-1 flex flex-wrap gap-x-6 text-sm">
           <div><dt className="inline font-medium">{fr.devoirs.entete.nom} : </dt><dd className="inline">{eleve}</dd></div>
           <div><dt className="inline font-medium">{fr.devoirs.entete.classe} : </dt><dd className="inline">{classeTexte}</dd></div>
@@ -46,7 +56,12 @@ export function DevoirDocument(props: {
           <ol className="space-y-4">
             {matiere.exercices.map((ex) => (
               <li key={ex.numero} className="break-inside-avoid">
-                <p className="font-medium">{ex.numero}. {ex.consigne}</p>
+                <p className="font-medium">
+                  {ex.numero}. {ex.consigne}
+                  {secondaire && ex.points != null && (
+                    <span className="ml-2 font-normal text-slate-500">({ex.points} {fr.devoirs.pointsUnite})</span>
+                  )}
+                </p>
                 {ex.items.length > 0 && (
                   <ul className="mt-1 flex flex-wrap gap-x-6 gap-y-1 pl-4">
                     {ex.items.map((item, i) => (
