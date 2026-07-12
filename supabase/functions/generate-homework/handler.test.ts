@@ -29,7 +29,7 @@ function fauxServeurClaude(): { url: string; stop: () => void } {
   return { url: `http://127.0.0.1:${port}`, stop: () => ac.abort() };
 }
 
-async function parentAvecEnfant() {
+async function parentAvecEnfant(classe = 'CP1', matieres = ['Français']) {
   const email = `hw-${crypto.randomUUID()}@test.educi.ci`;
   const password = 'Motdepasse!234';
   const admin = createClient(URL, SERVICE, { auth: { persistSession: false } });
@@ -38,8 +38,8 @@ async function parentAvecEnfant() {
   const { data } = await client.auth.signInWithPassword({ email, password });
   const { data: childId } = await client.rpc('create_child_with_enrollment', {
     p_nom: 'K', p_prenoms: 'L', p_date_naissance: '2019-03-12', p_sexe: 'M',
-    p_annee_scolaire: '2026-2027', p_classe: 'CP1', p_etablissement: 'EPP',
-    p_systeme: 'IVOIRIEN', p_matieres: ['Français'],
+    p_annee_scolaire: '2026-2027', p_classe: classe, p_etablissement: 'EPP',
+    p_systeme: 'IVOIRIEN', p_matieres: matieres,
   });
   return { token: data!.session!.access_token, childId: childId as string };
 }
@@ -70,6 +70,43 @@ Deno.test('refuse une saisie trop courte', async () => {
     method: 'POST',
     headers: { 'content-type': 'application/json', Authorization: `Bearer ${token}` },
     body: JSON.stringify({ childId, message: 'x' }),
+  });
+  const res = await handler(req);
+  assertEquals(res.status, 400);
+});
+
+Deno.test('génère un contrôle secondaire à partir de plusieurs matières', async () => {
+  const faux = fauxServeurClaude();
+  Deno.env.set('ANTHROPIC_API_KEY', 'test');
+  Deno.env.set('ANTHROPIC_BASE_URL', faux.url);
+  try {
+    const { token, childId } = await parentAvecEnfant('6EME', ['Français', 'Mathématiques']);
+    const req = new Request('http://local/generate-homework', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({
+        childId,
+        matieres: [
+          { matiere: 'Mathématiques', contenu: 'Les fractions et les nombres décimaux.' },
+          { matiere: 'Anglais', contenu: 'ignorée car hors inscription' },
+        ],
+      }),
+    });
+    const res = await handler(req);
+    assertEquals(res.status, 200);
+    const corps = await res.json();
+    assertEquals(corps.devoir.matieres[0].nom, 'Français');
+  } finally {
+    faux.stop();
+  }
+});
+
+Deno.test('secondaire : refuse une saisie sans matière valide', async () => {
+  const { token, childId } = await parentAvecEnfant('6EME', ['Français', 'Mathématiques']);
+  const req = new Request('http://local/generate-homework', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ childId, matieres: [{ matiere: 'Mathématiques', contenu: 'x' }] }),
   });
   const res = await handler(req);
   assertEquals(res.status, 400);
