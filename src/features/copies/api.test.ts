@@ -3,17 +3,30 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mockUpload = vi.fn();
 const mockFrom = vi.fn();
 const mockGetUser = vi.fn();
+const mockInvoke = vi.fn();
 vi.mock('../../lib/supabase', () => ({
   supabase: {
     storage: { from: () => ({ upload: (...a: unknown[]) => mockUpload(...a) }) },
     from: (...a: unknown[]) => mockFrom(...a),
     auth: { getUser: () => mockGetUser() },
+    functions: { invoke: (...a: unknown[]) => mockInvoke(...a) },
   },
 }));
 
-import { creerSoumission, listerSoumissions, televerserCopie } from './api';
+import { corrigerSoumission, creerSoumission, listerSoumissions, televerserCopie } from './api';
 
 beforeEach(() => vi.clearAllMocks());
+
+describe('corrigerSoumission', () => {
+  it('invoque correct-submission et propage le quota', async () => {
+    mockInvoke.mockResolvedValue({ data: { note: 15, appreciation: 'ok', details: [] }, error: null });
+    const c = await corrigerSoumission('s1');
+    expect(c.appreciation).toBe('ok');
+    expect(mockInvoke).toHaveBeenCalledWith('correct-submission', { body: { submissionId: 's1' } });
+    mockInvoke.mockResolvedValue({ data: null, error: { context: { status: 429 } } });
+    await expect(corrigerSoumission('s1')).rejects.toMatchObject({ code: 'quota' });
+  });
+});
 
 describe('televerserCopie', () => {
   it('téléverse le blob et propage une erreur', async () => {

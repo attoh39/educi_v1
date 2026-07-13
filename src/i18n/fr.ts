@@ -87,4 +87,16 @@ export const fr = {
     envoiReussi: 'Copies envoyées. La correction sera bientôt disponible.',
     envoiPartiel: 'Certaines photos n’ont pas pu être envoyées. Réessayez.',
   },
+  correction: {
+    lancer: 'Lancer la correction',
+    enCours: 'Correction en cours…',
+    titre: 'Correction',
+    note: 'Note',
+    reussi: 'Réussi',
+    partiel: 'Partiel',
+    aRevoir: 'À revoir',
+    bonneReponse: 'Bonne réponse',
+    quotaAtteint: 'Quota de corrections de la semaine atteint. Réessayez la semaine prochaine.',
+    echec: 'La correction a échoué (copies illisibles ?). Réessayez sans perdre votre quota.',
+  },
 } as const;
