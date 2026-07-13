@@ -74,4 +74,17 @@ export const fr = {
     pointsUnite: 'pts',
     entete: { classe: 'Classe', date: 'Date', nom: 'Élève' },
   },
+  copies: {
+    devoirsTitre: 'Devoirs de l’enfant',
+    aucunDevoir: 'Aucun devoir généré pour l’instant.',
+    envoyerCopies: 'Envoyer les copies',
+    captureTitre: 'Photographier les copies',
+    ajouterPhoto: 'Ajouter une photo',
+    enFile: 'photo(s) en attente d’envoi',
+    envoyer: 'Envoyer',
+    envoiEnCours: 'Envoi…',
+    reessayer: 'Réessayer',
+    envoiReussi: 'Copies envoyées. La correction sera bientôt disponible.',
+    envoiPartiel: 'Certaines photos n’ont pas pu être envoyées. Réessayez.',
+  },
 } as const;

@@ -48,6 +48,14 @@ export function ChildrenPage() {
                   {fr.devoirs.titre}
                 </Link>
               )}
+              {inscription && (
+                <Link
+                  to={`/enfants/${e.id}/devoirs`}
+                  className="mt-2 ml-2 inline-block rounded-lg border border-teal-600 px-3 py-2 text-sm font-semibold text-teal-700"
+                >
+                  {fr.copies.devoirsTitre}
+                </Link>
+              )}
             </li>
           );
         })}
