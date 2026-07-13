@@ -42,7 +42,7 @@ export function ChildrenPage() {
               {inscription && (
                 <Link
                   to={`/enfants/${e.id}/devoir`}
-                  state={{ eleve: `${e.prenoms} ${e.nom}`, classe: inscription.classe }}
+                  state={{ eleve: `${e.prenoms} ${e.nom}`, classe: inscription.classe, matieres: inscription.matieres }}
                   className="mt-2 inline-block rounded-lg bg-teal-600 px-3 py-2 text-sm font-semibold text-white"
                 >
                   {fr.devoirs.titre}

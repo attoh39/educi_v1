@@ -31,6 +31,10 @@ Tests de l'Edge Function (faux serveur Claude, aucune dépense) :
 
 En production : `npx supabase secrets set ANTHROPIC_API_KEY=…` puis `npx supabase functions deploy generate-homework`.
 
+Le mode secondaire (collège/lycée) réutilise la même fonction : le corps est
+`{ childId, matieres: [{ matiere, contenu }] }` au lieu de `{ childId, message }`.
+Le mode est déterminé côté serveur d'après la classe de l'enfant.
+
 ## Scripts
 
 | Commande | Rôle |

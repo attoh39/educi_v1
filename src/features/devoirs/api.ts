@@ -11,10 +11,15 @@ export class GenerationError extends Error {
   }
 }
 
-export async function genererDevoir(childId: string, message: string): Promise<DevoirGenere> {
-  const { data, error } = await supabase.functions.invoke('generate-homework', {
-    body: { childId, message },
-  });
+export type SaisieDevoir =
+  | { mode: 'primaire'; message: string }
+  | { mode: 'secondaire'; matieres: { matiere: string; contenu: string }[] };
+
+export async function genererDevoir(childId: string, saisie: SaisieDevoir): Promise<DevoirGenere> {
+  const body = saisie.mode === 'primaire'
+    ? { childId, message: saisie.message }
+    : { childId, matieres: saisie.matieres };
+  const { data, error } = await supabase.functions.invoke('generate-homework', { body });
   if (error) {
     const status = (error as { context?: { status?: number } }).context?.status;
     if (status === 429) throw new GenerationError('quota');

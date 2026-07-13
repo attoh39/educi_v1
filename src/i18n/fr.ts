@@ -66,6 +66,12 @@ export const fr = {
     echec: 'La génération a échoué. Vous pouvez réessayer sans perdre votre quota.',
     aucunEnfant: 'Ajoutez d’abord un enfant.',
     choisirEnfant: 'Pour quel enfant ?',
+    titreControle: 'Générer un contrôle',
+    instructionSecondaire: 'Remplissez les matières dont vous avez reçu le cours (les autres peuvent rester vides).',
+    genererControle: 'Générer le contrôle',
+    controle: 'Contrôle',
+    noteSur: 'Noté sur 20',
+    pointsUnite: 'pts',
     entete: { classe: 'Classe', date: 'Date', nom: 'Élève' },
   },
 } as const;

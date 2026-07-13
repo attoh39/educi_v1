@@ -1,9 +1,19 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { devoirSchema, DEVOIR_JSON_SCHEMA } from '../_shared/devoir.ts';
-import { profilPourCycle, PROMPT_VERSION } from '../_shared/profils.ts';
+import {
+  profilPourCycle, profilSecondaire, PROMPT_VERSION, PROMPT_VERSION_SECONDAIRE,
+} from '../_shared/profils.ts';
 import { genererJson, MODELE } from '../_shared/claude.ts';
 
 const GENERATIONS_PAR_SEMAINE = 10;
+
+const CYCLES: Record<string, string> = {
+  PS: 'maternelle', MS: 'maternelle', GS: 'maternelle',
+  CP1: 'cp_ce1', CP2: 'cp_ce1', CE1: 'cp_ce1',
+  CE2: 'ce2_cm2', CM1: 'ce2_cm2', CM2: 'ce2_cm2',
+  '6EME': 'college', '5EME': 'college', '4EME': 'college', '3EME': 'college',
+  SECONDE: 'lycee', PREMIERE: 'lycee', TERMINALE: 'lycee',
+};
 
 function semaineIso(date: Date): string {
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
@@ -20,6 +30,15 @@ function reponseJson(corps: unknown, statut = 200): Response {
     headers: { 'content-type': 'application/json' },
   });
 }
+
+type Preparation = {
+  systeme: string;
+  message: string;
+  profilCle: string;
+  promptVersion: string;
+  mode: 'primaire' | 'secondaire';
+  contenu: Record<string, unknown>;
+};
 
 export async function handler(req: Request): Promise<Response> {
   if (req.method !== 'POST') return reponseJson({ erreur: 'méthode' }, 405);
@@ -40,34 +59,56 @@ export async function handler(req: Request): Promise<Response> {
   const user = userData?.user;
   if (!user) return reponseJson({ erreur: 'non authentifié' }, 401);
 
-  let corps: { childId?: string; message?: string };
+  let corps: {
+    childId?: string;
+    message?: string;
+    matieres?: { matiere?: string; contenu?: string }[];
+  };
   try {
     corps = await req.json();
   } catch {
     return reponseJson({ erreur: 'corps invalide' }, 400);
   }
-  const message = (corps.message ?? '').trim();
-  if (!corps.childId || message.length < 3) {
-    return reponseJson({ erreur: 'saisie invalide' }, 400);
-  }
+  if (!corps.childId) return reponseJson({ erreur: 'saisie invalide' }, 400);
 
   // Inscription active de l'enfant (RLS garantit l'appartenance au parent).
   const { data: enr } = await supabase
     .from('enrollments')
-    .select('id, classe')
+    .select('id, classe, matieres')
     .eq('child_id', corps.childId)
     .eq('is_active', true)
     .single();
   if (!enr) return reponseJson({ erreur: 'enfant introuvable' }, 404);
 
-  const cycles: Record<string, string> = {
-    PS: 'maternelle', MS: 'maternelle', GS: 'maternelle',
-    CP1: 'cp_ce1', CP2: 'cp_ce1', CE1: 'cp_ce1',
-    CE2: 'ce2_cm2', CM1: 'ce2_cm2', CM2: 'ce2_cm2',
-  };
-  const cycle = cycles[enr.classe as string];
-  const profil = cycle ? profilPourCycle(cycle) : null;
-  if (!profil) return reponseJson({ erreur: 'niveau non pris en charge' }, 400);
+  const cycle = CYCLES[enr.classe as string];
+  const mode: 'primaire' | 'secondaire' =
+    cycle === 'college' || cycle === 'lycee' ? 'secondaire' : 'primaire';
+
+  let prep: Preparation;
+  if (mode === 'primaire') {
+    const message = (corps.message ?? '').trim();
+    if (message.length < 3) return reponseJson({ erreur: 'saisie invalide' }, 400);
+    const profil = cycle ? profilPourCycle(cycle) : null;
+    if (!profil) return reponseJson({ erreur: 'niveau non pris en charge' }, 400);
+    prep = {
+      systeme: profil.texte, message, profilCle: profil.cle,
+      promptVersion: PROMPT_VERSION, mode: 'primaire', contenu: { message },
+    };
+  } else {
+    const permises = new Set((enr.matieres as string[] | null) ?? []);
+    const presentes = (Array.isArray(corps.matieres) ? corps.matieres : [])
+      .map((m) => ({ matiere: String(m.matiere ?? ''), contenu: String(m.contenu ?? '').trim() }))
+      .filter((m) => m.contenu.length >= 3 && permises.has(m.matiere));
+    if (presentes.length === 0) return reponseJson({ erreur: 'saisie invalide' }, 400);
+    const profil = profilSecondaire(cycle, presentes.map((m) => m.matiere));
+    if (!profil) return reponseJson({ erreur: 'niveau non pris en charge' }, 400);
+    const message = presentes.map((m) => `Matière : ${m.matiere}\n${m.contenu}`).join('\n\n');
+    prep = {
+      systeme: profil.texte, message, profilCle: profil.cle,
+      promptVersion: PROMPT_VERSION_SECONDAIRE, mode: 'secondaire',
+      contenu: { matieres: presentes },
+    };
+  }
 
   // Vérification du quota (sans incrémenter).
   const semaine = semaineIso(new Date());
@@ -86,15 +127,15 @@ export async function handler(req: Request): Promise<Response> {
     .from('homework_requests')
     .insert({
       parent_id: user.id, child_id: corps.childId, enrollment_id: enr.id,
-      mode: 'primaire', contenu: { message }, statut: 'generation',
+      mode: prep.mode, contenu: prep.contenu, statut: 'generation',
     })
     .select('id')
     .single();
   if (eReq || !request) return reponseJson({ erreur: 'création demande' }, 500);
 
   const resultat = await genererJson({
-    systeme: profil.texte,
-    message,
+    systeme: prep.systeme,
+    message: prep.message,
     jsonSchema: DEVOIR_JSON_SCHEMA,
     apiKey,
     baseUrl: Deno.env.get('ANTHROPIC_BASE_URL') ?? undefined,
@@ -122,7 +163,7 @@ export async function handler(req: Request): Promise<Response> {
       enrollment_id: enr.id,
       exercices: { matieres: parsed.data.matieres },
       corrige: parsed.data.corrige,
-      profil: profil.cle, prompt_version: PROMPT_VERSION, modele: MODELE,
+      profil: prep.profilCle, prompt_version: prep.promptVersion, modele: MODELE,
       cout_tokens_entree: resultat.tokensEntree, cout_tokens_sortie: resultat.tokensSortie,
     })
     .select('id, exercices')

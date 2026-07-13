@@ -30,4 +30,14 @@ describe('devoirSchema', () => {
   it('exige au moins une matière', () => {
     expect(devoirSchema.safeParse({ ...valide, matieres: [] }).success).toBe(false);
   });
+  it('accepte un exercice avec un barème points', () => {
+    const x = structuredClone(valide);
+    (x.matieres[0].exercices[0] as { points?: number }).points = 3;
+    expect(devoirSchema.safeParse(x).success).toBe(true);
+  });
+  it('refuse un points négatif', () => {
+    const x = structuredClone(valide);
+    (x.matieres[0].exercices[0] as { points?: number }).points = -1;
+    expect(devoirSchema.safeParse(x).success).toBe(false);
+  });
 });
