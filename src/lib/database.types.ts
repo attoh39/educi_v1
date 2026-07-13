@@ -282,6 +282,61 @@ export type Database = {
         }
         Relationships: []
       }
+      submissions: {
+        Row: {
+          child_id: string
+          created_at: string
+          erreur: string | null
+          homework_id: string
+          id: string
+          parent_id: string
+          photo_paths: string[]
+          statut: Database["public"]["Enums"]["submission_statut"]
+        }
+        Insert: {
+          child_id: string
+          created_at?: string
+          erreur?: string | null
+          homework_id: string
+          id?: string
+          parent_id: string
+          photo_paths?: string[]
+          statut?: Database["public"]["Enums"]["submission_statut"]
+        }
+        Update: {
+          child_id?: string
+          created_at?: string
+          erreur?: string | null
+          homework_id?: string
+          id?: string
+          parent_id?: string
+          photo_paths?: string[]
+          statut?: Database["public"]["Enums"]["submission_statut"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submissions_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "submissions_homework_id_fkey"
+            columns: ["homework_id"]
+            isOneToOne: false
+            referencedRelation: "homeworks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "submissions_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "parents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       usage_quotas: {
         Row: {
           child_id: string
@@ -364,6 +419,7 @@ export type Database = {
         | "PREMIERE"
         | "TERMINALE"
       homework_statut: "en_attente" | "generation" | "pret" | "echec"
+      submission_statut: "envoye" | "correction" | "corrige" | "echec"
       systeme_educatif: "IVOIRIEN" | "FRANCAIS" | "AUTRE"
     }
     CompositeTypes: {
@@ -514,6 +570,7 @@ export const Constants = {
         "TERMINALE",
       ],
       homework_statut: ["en_attente", "generation", "pret", "echec"],
+      submission_statut: ["envoye", "correction", "corrige", "echec"],
       systeme_educatif: ["IVOIRIEN", "FRANCAIS", "AUTRE"],
     },
   },
