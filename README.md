@@ -35,6 +35,18 @@ Le mode secondaire (collège/lycée) réutilise la même fonction : le corps est
 `{ childId, matieres: [{ matiere, contenu }] }` au lieu de `{ childId, message }`.
 Le mode est déterminé côté serveur d'après la classe de l'enfant.
 
+### Envoi des copies (2a)
+
+Le parent ouvre « Devoirs » depuis la fiche d'un enfant, choisit un devoir et
+photographie les copies. Les images sont compressées côté client, mises en file
+locale (reprise manuelle si hors ligne) et téléversées dans le bucket privé
+`copies` (chemin `parentId/childId/homeworkId/…`, accès restreint par policies
+Storage). Une ligne `submissions` référence le devoir et les photos. La
+correction IA de ces copies est le sous-plan 2b.
+
+Note tests : `npm run test:rls` s'exécute en séquentiel (`fileParallelism: false`)
+pour ne pas saturer le conteneur storage local.
+
 ## Scripts
 
 | Commande | Rôle |
