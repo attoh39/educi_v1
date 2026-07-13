@@ -1,4 +1,24 @@
 import { supabase } from '../../lib/supabase';
+import type { Correction } from '../correction/schema';
+
+export class CorrectionError extends Error {
+  code: 'quota' | 'echec';
+  constructor(code: 'quota' | 'echec') {
+    super(code);
+    this.code = code;
+  }
+}
+
+export async function corrigerSoumission(submissionId: string): Promise<Correction> {
+  const { data, error } = await supabase.functions.invoke('correct-submission', {
+    body: { submissionId },
+  });
+  if (error) {
+    const status = (error as { context?: { status?: number } }).context?.status;
+    throw new CorrectionError(status === 429 ? 'quota' : 'echec');
+  }
+  return data as Correction;
+}
 
 export type Soumission = {
   id: string;

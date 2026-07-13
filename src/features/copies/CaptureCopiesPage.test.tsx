@@ -6,9 +6,15 @@ import { beforeEach, expect, it, vi } from 'vitest';
 const mockCompresser = vi.fn();
 const mockEnvoyer = vi.fn();
 const mockCreer = vi.fn();
+const mockCorriger = vi.fn();
 vi.mock('./compression', () => ({ compresserImage: (...a: unknown[]) => mockCompresser(...a) }));
 vi.mock('./envoi', () => ({ envoyerElements: (...a: unknown[]) => mockEnvoyer(...a) }));
-vi.mock('./api', () => ({ creerSoumission: (...a: unknown[]) => mockCreer(...a) }));
+vi.mock('./api', () => ({
+  creerSoumission: (...a: unknown[]) => mockCreer(...a),
+  corrigerSoumission: (...a: unknown[]) => mockCorriger(...a),
+  CorrectionError: class extends Error { code: string; constructor(c: string) { super(c); this.code = c; } },
+}));
+vi.mock('../correction/CorrectionDocument', () => ({ CorrectionDocument: () => <div>DOC_CORRECTION</div> }));
 vi.mock('../auth/AuthProvider', () => ({ useAuth: () => ({ session: { user: { id: 'parent-1' } } }) }));
 vi.mock('react-router-dom', async (orig) => ({
   ...(await orig<typeof import('react-router-dom')>()),
@@ -45,4 +51,17 @@ it('affiche un envoi partiel en cas d’échec', async () => {
   await userEvent.click(screen.getByRole('button', { name: 'Envoyer' }));
   expect(await screen.findByText(/Certaines photos/)).toBeInTheDocument();
   expect(mockCreer).not.toHaveBeenCalled();
+});
+
+it('après envoi, lance la correction et affiche le résultat', async () => {
+  mockCompresser.mockResolvedValue(new Blob(['z'], { type: 'image/jpeg' }));
+  mockEnvoyer.mockResolvedValue({ envoyes: ['parent-1/c1/h1/u.jpg'], echoues: [] });
+  mockCreer.mockResolvedValue({ id: 's1' });
+  mockCorriger.mockResolvedValue({ note: 15, appreciation: 'ok', details: [] });
+  rendre();
+  await userEvent.upload(screen.getByLabelText('Ajouter une photo'), new File(['x'], 'c.jpg', { type: 'image/jpeg' }));
+  await userEvent.click(screen.getByRole('button', { name: 'Envoyer' }));
+  await userEvent.click(await screen.findByRole('button', { name: 'Lancer la correction' }));
+  expect(await screen.findByText('DOC_CORRECTION')).toBeInTheDocument();
+  expect(mockCorriger).toHaveBeenCalledWith('s1');
 });

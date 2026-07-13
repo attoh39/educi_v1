@@ -13,6 +13,7 @@ export async function genererJson(params: {
   jsonSchema: unknown;
   apiKey: string;
   baseUrl?: string; // surchargé par les tests pour pointer un faux serveur
+  images?: string[]; // base64 JPEG ; si présent, contenu multimodal
 }): Promise<ResultatClaude> {
   const base = params.baseUrl ?? 'https://api.anthropic.com';
   let reponse: Response;
@@ -31,7 +32,18 @@ export async function genererJson(params: {
         system: [
           { type: 'text', text: params.systeme, cache_control: { type: 'ephemeral' } },
         ],
-        messages: [{ role: 'user', content: params.message }],
+        messages: [{
+          role: 'user',
+          content: params.images && params.images.length > 0
+            ? [
+                { type: 'text', text: params.message },
+                ...params.images.map((data) => ({
+                  type: 'image',
+                  source: { type: 'base64', media_type: 'image/jpeg', data },
+                })),
+              ]
+            : params.message,
+        }],
         output_config: {
           // Pas de champ "name" : l'API n'accepte que { type, schema } pour
           // output_config.format (vérifié via la doc structured-outputs).

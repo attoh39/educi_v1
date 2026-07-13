@@ -47,6 +47,15 @@ correction IA de ces copies est le sous-plan 2b.
 Note tests : `npm run test:rls` s'exécute en séquentiel (`fileParallelism: false`)
 pour ne pas saturer le conteneur storage local.
 
+### Correction IA (2b)
+
+Depuis l'écran de capture, après l'envoi des copies, le parent lance la
+correction. L'Edge Function `correct-submission` télécharge les photos (base64),
+les envoie avec l'énoncé et le corrigé à Claude Sonnet 5 vision, et persiste une
+correction (`corrections`) : note /20 au secondaire, appréciation au primaire,
+feedback par exercice. Quota `corrections/semaine` séparé. Déploiement identique
+à `generate-homework` (même secret `ANTHROPIC_API_KEY`).
+
 ## Scripts
 
 | Commande | Rôle |

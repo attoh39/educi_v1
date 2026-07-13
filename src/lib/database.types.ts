@@ -75,6 +75,83 @@ export type Database = {
           },
         ]
       }
+      corrections: {
+        Row: {
+          appreciation: string
+          child_id: string
+          cout_tokens_entree: number
+          cout_tokens_sortie: number
+          created_at: string
+          details: Json
+          homework_id: string
+          id: string
+          modele: string
+          note: number | null
+          parent_id: string
+          prompt_version: string
+          submission_id: string
+        }
+        Insert: {
+          appreciation: string
+          child_id: string
+          cout_tokens_entree?: number
+          cout_tokens_sortie?: number
+          created_at?: string
+          details: Json
+          homework_id: string
+          id?: string
+          modele: string
+          note?: number | null
+          parent_id: string
+          prompt_version: string
+          submission_id: string
+        }
+        Update: {
+          appreciation?: string
+          child_id?: string
+          cout_tokens_entree?: number
+          cout_tokens_sortie?: number
+          created_at?: string
+          details?: Json
+          homework_id?: string
+          id?: string
+          modele?: string
+          note?: number | null
+          parent_id?: string
+          prompt_version?: string
+          submission_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "corrections_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "corrections_homework_id_fkey"
+            columns: ["homework_id"]
+            isOneToOne: false
+            referencedRelation: "homeworks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "corrections_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "parents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "corrections_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: true
+            referencedRelation: "submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       enrollments: {
         Row: {
           annee_scolaire: string
@@ -340,6 +417,7 @@ export type Database = {
       usage_quotas: {
         Row: {
           child_id: string
+          corrections: number
           generations: number
           id: string
           parent_id: string
@@ -347,6 +425,7 @@ export type Database = {
         }
         Insert: {
           child_id: string
+          corrections?: number
           generations?: number
           id?: string
           parent_id: string
@@ -354,6 +433,7 @@ export type Database = {
         }
         Update: {
           child_id?: string
+          corrections?: number
           generations?: number
           id?: string
           parent_id?: string
@@ -394,6 +474,10 @@ export type Database = {
           p_systeme: Database["public"]["Enums"]["systeme_educatif"]
         }
         Returns: string
+      }
+      incrementer_correction: {
+        Args: { p_child_id: string; p_semaine_iso: string }
+        Returns: number
       }
       incrementer_quota: {
         Args: { p_child_id: string; p_semaine_iso: string }
