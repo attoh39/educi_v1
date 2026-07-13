@@ -7,6 +7,7 @@ import { AccountPage } from './features/account/AccountPage';
 import { ChildrenPage } from './features/children/ChildrenPage';
 import { NewChildPage } from './features/children/NewChildPage';
 import { GenerateHomeworkPage } from './features/devoirs/GenerateHomeworkPage';
+import { DevoirsPage } from './features/devoirs/DevoirsPage';
 
 export const router = createBrowserRouter([
   { path: '/connexion', element: <LoginPage /> },
@@ -20,6 +21,7 @@ export const router = createBrowserRouter([
           { path: '/enfants', element: <ChildrenPage /> },
           { path: '/enfants/nouveau', element: <NewChildPage /> },
           { path: '/enfants/:childId/devoir', element: <GenerateHomeworkPage /> },
+          { path: '/enfants/:childId/devoirs', element: <DevoirsPage /> },
           { path: '/compte', element: <AccountPage /> },
         ],
       },
