@@ -56,6 +56,14 @@ correction (`corrections`) : note /20 au secondaire, appréciation au primaire,
 feedback par exercice. Quota `corrections/semaine` séparé. Déploiement identique
 à `generate-homework` (même secret `ANTHROPIC_API_KEY`).
 
+### Dossier pédagogique (Plan 3)
+
+Chaque correction émet (même appel Claude) des compétences par matière avec leur
+maîtrise (acquis / en cours / fragile). L'Edge Function `correct-submission` les
+enregistre via `enregistrer_competence` dans `skill_records` (niveau courant) et
+`skill_events` (historique daté). Le parent consulte le « Dossier » d'un enfant.
+Ces données alimenteront le Coach IA et le tableau de bord (plans ultérieurs).
+
 ## Scripts
 
 | Commande | Rôle |

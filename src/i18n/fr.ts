@@ -99,4 +99,13 @@ export const fr = {
     quotaAtteint: 'Quota de corrections de la semaine atteint. Réessayez la semaine prochaine.',
     echec: 'La correction a échoué (copies illisibles ?). Réessayez sans perdre votre quota.',
   },
+  dossier: {
+    titre: 'Dossier pédagogique',
+    lien: 'Dossier',
+    aucun: 'Aucune donnée : faites corriger des copies pour construire le dossier.',
+    acquis: 'Acquis',
+    enCours: 'En cours',
+    fragile: 'Fragile',
+    observations: 'observation(s)',
+  },
 } as const;

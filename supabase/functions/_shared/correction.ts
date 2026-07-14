@@ -1,7 +1,8 @@
 import { z } from 'npm:zod@3';
 
-export const PROMPT_VERSION_CORRECTION = 'correction-v1';
+export const PROMPT_VERSION_CORRECTION = 'correction-v2';
 export const STATUTS_EXERCICE = ['reussi', 'partiel', 'a_revoir'] as const;
+export const MAITRISES = ['acquis', 'en_cours', 'fragile'] as const;
 
 export const correctionSchema = z.object({
   note: z.number().min(0).max(20).optional(),
@@ -13,6 +14,13 @@ export const correctionSchema = z.object({
       statut: z.enum(STATUTS_EXERCICE),
       explication: z.string(),
       bonneReponse: z.string(),
+    }),
+  ),
+  competences: z.array(
+    z.object({
+      matiere: z.string().min(1),
+      libelle: z.string().min(1),
+      maitrise: z.enum(MAITRISES),
     }),
   ),
 });
@@ -40,8 +48,21 @@ export const CORRECTION_JSON_SCHEMA = {
         required: ['matiere', 'numero', 'statut', 'explication', 'bonneReponse'],
       },
     },
+    competences: {
+      type: 'array',
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        properties: {
+          matiere: { type: 'string' },
+          libelle: { type: 'string' },
+          maitrise: { type: 'string', enum: [...MAITRISES] },
+        },
+        required: ['matiere', 'libelle', 'maitrise'],
+      },
+    },
   },
-  required: ['appreciation', 'details'],
+  required: ['appreciation', 'details', 'competences'],
 } as const;
 
 const COMMUN = `Tu es un enseignant qui corrige la copie manuscrite d'un élève en Côte d'Ivoire.
@@ -53,6 +74,7 @@ Règles :
 - Pour chaque exercice, donne un statut ("reussi", "partiel" ou "a_revoir"),
   une explication courte et bienveillante, et la bonne réponse.
 - Rédige en français, avec des mots simples et encourageants.
+- Identifie 1 à 3 compétences ou notions clés par matière (libellés courts, ex. "additions jusqu'à 100", "accord du participe passé") dans "competences", avec leur maîtrise : "acquis", "en_cours" ou "fragile".
 - Si une copie est illisible, indique-le dans l'appréciation et mets "a_revoir".`;
 
 export function profilCorrection(mode: 'primaire' | 'secondaire'): string {

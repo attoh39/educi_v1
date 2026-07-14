@@ -359,6 +359,109 @@ export type Database = {
         }
         Relationships: []
       }
+      skill_events: {
+        Row: {
+          child_id: string
+          competence: string
+          correction_id: string
+          created_at: string
+          id: string
+          maitrise: Database["public"]["Enums"]["maitrise_niveau"]
+          matiere: string
+          parent_id: string
+        }
+        Insert: {
+          child_id: string
+          competence: string
+          correction_id: string
+          created_at?: string
+          id?: string
+          maitrise: Database["public"]["Enums"]["maitrise_niveau"]
+          matiere: string
+          parent_id: string
+        }
+        Update: {
+          child_id?: string
+          competence?: string
+          correction_id?: string
+          created_at?: string
+          id?: string
+          maitrise?: Database["public"]["Enums"]["maitrise_niveau"]
+          matiere?: string
+          parent_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "skill_events_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "skill_events_correction_id_fkey"
+            columns: ["correction_id"]
+            isOneToOne: false
+            referencedRelation: "corrections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "skill_events_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "parents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      skill_records: {
+        Row: {
+          child_id: string
+          competence: string
+          id: string
+          maitrise: Database["public"]["Enums"]["maitrise_niveau"]
+          matiere: string
+          observations: number
+          parent_id: string
+          updated_at: string
+        }
+        Insert: {
+          child_id: string
+          competence: string
+          id?: string
+          maitrise: Database["public"]["Enums"]["maitrise_niveau"]
+          matiere: string
+          observations?: number
+          parent_id: string
+          updated_at?: string
+        }
+        Update: {
+          child_id?: string
+          competence?: string
+          id?: string
+          maitrise?: Database["public"]["Enums"]["maitrise_niveau"]
+          matiere?: string
+          observations?: number
+          parent_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "skill_records_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "skill_records_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "parents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       submissions: {
         Row: {
           child_id: string
@@ -475,6 +578,16 @@ export type Database = {
         }
         Returns: string
       }
+      enregistrer_competence: {
+        Args: {
+          p_child_id: string
+          p_competence: string
+          p_correction_id: string
+          p_maitrise: Database["public"]["Enums"]["maitrise_niveau"]
+          p_matiere: string
+        }
+        Returns: undefined
+      }
       incrementer_correction: {
         Args: { p_child_id: string; p_semaine_iso: string }
         Returns: number
@@ -503,6 +616,7 @@ export type Database = {
         | "PREMIERE"
         | "TERMINALE"
       homework_statut: "en_attente" | "generation" | "pret" | "echec"
+      maitrise_niveau: "acquis" | "en_cours" | "fragile"
       submission_statut: "envoye" | "correction" | "corrige" | "echec"
       systeme_educatif: "IVOIRIEN" | "FRANCAIS" | "AUTRE"
     }
@@ -654,6 +768,7 @@ export const Constants = {
         "TERMINALE",
       ],
       homework_statut: ["en_attente", "generation", "pret", "echec"],
+      maitrise_niveau: ["acquis", "en_cours", "fragile"],
       submission_statut: ["envoye", "correction", "corrige", "echec"],
       systeme_educatif: ["IVOIRIEN", "FRANCAIS", "AUTRE"],
     },
