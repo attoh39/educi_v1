@@ -10,6 +10,7 @@ const CORRECTION_FIXE = {
   note: 15,
   appreciation: 'Bon travail, quelques erreurs.',
   details: [{ matiere: 'Français', numero: 1, statut: 'reussi', explication: 'Bien lu.', bonneReponse: 'MA' }],
+  competences: [{ matiere: 'Français', libelle: 'syllabes', maitrise: 'en_cours' }],
 };
 
 function fauxServeurClaude(): { url: string; stop: () => void } {
@@ -56,7 +57,7 @@ Deno.test('corrige une soumission et persiste la correction', async () => {
   Deno.env.set('ANTHROPIC_API_KEY', 'test');
   Deno.env.set('ANTHROPIC_BASE_URL', faux.url);
   try {
-    const { token, submissionId, client } = await parentAvecSoumission();
+    const { token, submissionId, client, childId } = await parentAvecSoumission();
     const req = new Request('http://local/correct-submission', {
       method: 'POST',
       headers: { 'content-type': 'application/json', Authorization: `Bearer ${token}` },
@@ -68,6 +69,8 @@ Deno.test('corrige une soumission et persiste la correction', async () => {
     assertEquals(corps.appreciation, 'Bon travail, quelques erreurs.');
     const { data: sub } = await client.from('submissions').select('statut').eq('id', submissionId).single();
     assertEquals(sub!.statut, 'corrige');
+    const { data: rec } = await client.from('skill_records').select('competence, maitrise').eq('child_id', childId);
+    assertEquals(rec?.[0]?.competence, 'syllabes');
   } finally {
     faux.stop();
   }

@@ -94,11 +94,23 @@ export async function handler(req: Request): Promise<Response> {
     note: parsed.data.note ?? null, appreciation: parsed.data.appreciation, details: parsed.data.details,
     modele: MODELE, prompt_version: PROMPT_VERSION_CORRECTION,
     cout_tokens_entree: resultat.tokensEntree, cout_tokens_sortie: resultat.tokensSortie,
-  }).select('note, appreciation, details').single();
+  }).select('id, note, appreciation, details').single();
   if (eCorr || !correction) return reponseJson({ erreur: 'persistance correction' }, 500);
 
   await supabase.from('submissions').update({ statut: 'corrige' }).eq('id', sub.id);
   await supabase.rpc('incrementer_correction', { p_child_id: sub.child_id, p_semaine_iso: semaine });
+
+  // Dossier pédagogique : enregistre chaque compétence (best-effort).
+  for (const comp of parsed.data.competences) {
+    try {
+      await supabase.rpc('enregistrer_competence', {
+        p_child_id: sub.child_id, p_correction_id: correction.id,
+        p_matiere: comp.matiere, p_competence: comp.libelle, p_maitrise: comp.maitrise,
+      });
+    } catch (_e) {
+      // L'échec de l'enregistrement d'une compétence n'annule pas la correction.
+    }
+  }
 
   return reponseJson({
     note: correction.note, appreciation: correction.appreciation, details: correction.details,
