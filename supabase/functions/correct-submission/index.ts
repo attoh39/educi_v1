@@ -107,7 +107,7 @@ export async function handler(req: Request): Promise<Response> {
         p_child_id: sub.child_id, p_correction_id: correction.id,
         p_matiere: comp.matiere, p_competence: comp.libelle, p_maitrise: comp.maitrise,
       });
-    } catch (_e) {
+    } catch {
       // L'échec de l'enregistrement d'une compétence n'annule pas la correction.
     }
   }
